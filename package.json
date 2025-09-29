@@ -1,12 +1,22 @@
-
 {
-    "name": "super-word-kingdom",
-    "version": "1.0.0",
-    "dependencies": {
-        "@nomicfoundation/hardhat-toolbox": "^5.0.0",
-        "@openzeppelin/contracts": "^5.0.0",
-        "@fhevm/solidity": "^0.1.0",
-        "merkletreejs": "^0.3.11",
-        "keccak256": "^1.0.6"
-    }
+  "name": "super-word-kingdom",
+  "version": "1.0.0",
+  "description": "Zama FHEVM Encrypted Wordle Kingdom",
+  "main": "index.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy": "hardhat run scripts/deploy.js --network sepolia",
+    "clean": "hardhat clean"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^3.0.0",
+    "@nomiclabs/hardhat-etherscan": "^3.1.8",
+    "hardhat": "^2.22.10"
+  },
+  "dependencies": {
+    "@fhevm/solidity": "^0.8.0",
+    "@openzeppelin/contracts": "^5.0.2",
+    "ethers": "^6.13.1"
+  }
 }
