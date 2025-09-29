@@ -7,16 +7,16 @@ Kripto Entegrasyonu: Ethereum token'ları ile giriş ücretleri/ödüller (Sepol
 NFT Pazaryeri: Başarılı tahminler için ERC-721 NFT mint et, ETH ile sat.
 Gizlilik Odaklı: Tüm veriler (tahminler, oylar, mesajlar) şifreli işlenir – Zama Concrete SDK ile entegre.
 
-Proje, erken aşama prototip niteliğindedir ve Zama Confidential AI Hackathon 2025'ten ilham alır. Solidity 0.8.20+ ile yazılmış, Hardhat ile geliştirilmiş.Teknoloji YığınıBackend: Solidity (Smart Contracts), Hardhat (Derleme/Test/Deploy), Zama FHEVM (Gizlilik).
+Proje, erken aşama prototip niteliğindedir ve Zama Confidential AI Hackathon 2025'ten ilham alır. Solidity 0.8.20+ ile yazılmış, Hardhat ile geliştirilmiş.Teknoloji YığınıBackend: Solidity (Smart Contracts), Hardhat (Derleme/Test/Deploy), Zama FHEVM (Gizlilik – Concrete Python SDK).
 Test: Mocha/Chai (Unit/Integration).
 Deploy: Sepolia Testnet (Infura RPC), Etherscan Verify.
 Gelecek: React Frontend (MetaMask entegrasyonu ile).
 
-Kurulum Rehberi (GitHub Codespaces İçin)Bu rehber, projeyi GitHub Codespaces'te çalıştırmak için tasarlandı. Kopyala-yapıştır komutları ile adım adım ilerle. Varsayımlar: Node.js 18+ (Codespaces'te varsayılan), MetaMask cüzdanı (test ETH için), Zama hesabı (FHE key için).Ön KoşullarGitHub hesabı (repo'yu fork'la: super-word-kingdom).
+Kurulum Rehberi (GitHub Codespaces İçin)Bu rehber, projeyi GitHub Codespaces'te çalıştırmak için tasarlandı. Kopyala-yapıştır komutları ile adım adım ilerle. Varsayımlar: Node.js 18+ (Codespaces'te varsayılan), MetaMask cüzdanı (test ETH için), Python 3.8+ (Zama için).Ön KoşullarGitHub hesabı (repo'yu fork'la: super-word-kingdom).
 MetaMask: Sepolia ağı ekle, test ETH al Sepolia Faucet.
-Zama: Ücretsiz hesap aç zama.ai, Concrete key al.
 Infura: Ücretsiz proje oluştur infura.io, Sepolia RPC URL al.
 Etherscan: API key al etherscan.io/apis.
+Zama Concrete: Yerel kurulum (dashboard zorunlu değil, açık kaynaklı – generate_key.py ile anahtar üret).
 
 Adım 1: Codespaces'i AçGitHub'da repo sayfasına git: https://github.com/Coinbol/super-word-kingdom.
 Sağ üstte yeşil "Code" butonu > "Codespaces" sekmesi > "Create codespace on main".(İlk 60 dakika ücretsiz; GitHub Pro için sınırsız.)
@@ -35,15 +35,34 @@ npm --version   # Çıktı: 8+ bekle
 # Proje dependencies'leri yükle (Hardhat, ethers, openzeppelin, zama)
 npm install
 
+# Zama Concrete SDK yükle (FHE anahtar/devre için – Python gerektirir)
+pip install concrete-python
+
 # Environment dosyasını oluştur ve doldur (.env.example'dan kopyala)
 cp .env.example .env
 # Şimdi .env'yi editörle aç (VS Code'da Ctrl+P > .env) ve doldur:
 # ETHERSCAN_API_KEY=your_key
 # PRIVATE_KEY=0x_your_metamask_private_key
 # SEPOLIA_RPC_URL=https://sepolia.infura.io/v3/your_project_id
-# ZAMA_CONCRETE_KEY=your_zama_key
+# ZAMA_CONCRETE_KEY=zama_concrete_key.json  # Adım 3'te üret
 
-Adım 3: Smart Contract'ları Derle ve Test EtTerminal'de:
+Adım 3: Zama FHE Anahtarı ve Devresi Üret (Yerel Olarak)ZAMA_CONCRETE_KEY bir API anahtarı değil, yerel üretilen şifreleme anahtarı. Dashboard zorunlu değil.
+
+# Anahtar üretme script'ini çalıştır (generate_key.py ile)
+python generate_key.py  # zama_concrete_key.json oluşturur
+
+# FHE devresini derle (Wordle logic'i için – circuits klasörüne git)
+mkdir -p circuits
+# wordle.py oluştur (örnek devre – Zama tutorial'ından uyarla)
+# İçerik: generate_key.py'deki gibi @fhe.compiler ile sar
+# python wordle.py  # compile() ile wordle.fhe üretir
+
+# .env'ye ekle: ZAMA_CONCRETE_KEY=zama_concrete_key.json
+# FHE_CIRCUIT_PATH=./circuits/wordle.fhe
+
+Not: Gerçek Wordle logic'i için Zama Encrypted Wordle Tutorial'ı kullan. Prototipte placeholder: ZAMA_CONCRETE_KEY=dummy_key_placeholder.
+
+Adım 4: Smart Contract'ları Derle ve Test EtTerminal'de:
 
 # Hardhat ile derle (Solidity + FHE placeholder'ları)
 npx hardhat compile
@@ -54,13 +73,12 @@ npx hardhat test test/SuperWordle.test.js
 # Integration test'leri çalıştır (tam akış: deploy + tahmin + oylama)
 npx hardhat test test/SuperWordleIntegration.test.js
 
-# Zama FHE devresini compile et (eğer circuits klasörü varsa, yoksa atla)
-# pip install concrete-compiler  # Eğer yüklü değilse
-# concrete compile contracts/SuperEncryptedWordle.fhe  # FHE devresi (prototipte placeholder)
+# Zama FHE devresini test et (anahtar yükle)
+python -c "from concrete import fhe; keys = fhe.Keys.load('zama_concrete_key.json'); print('Anahtar yüklendi!')"
 
 Beklenen Çıktı: Test'ler geçerse "All tests passed" göreceksin. Hata varsa: npx hardhat clean && npx hardhat compile tekrarla.
 
-Adım 4: Contract'ları Deploy Et (Sepolia Testnet)Terminal'de:
+Adım 5: Contract'ları Deploy Et (Sepolia Testnet)Terminal'de:
 
 # Deploy script'ini çalıştır (SuperEncryptedWordle deploy eder)
 npx hardhat run scripts/deploy.js --network sepolia
@@ -74,7 +92,7 @@ npx hardhat run scripts/verify.js --network sepolia
 Beklenen Çıktı: Konsola contract adresi yazılır (örn: "SuperEncryptedWordle deployed to: 0x123..."). .env'ye WORDLE_CONTRACT_ADDRESS=0x123... ekle.
 Gaz Maliyeti: Test ETH yeterli (0.01-0.1 ETH).
 
-Adım 5: Projeyi Test Et ve OynaLocal Test: Hardhat node başlat (fork için): npx hardhat node (ayrı terminal), sonra npx hardhat run scripts/deploy.js --network localhost.
+Adım 6: Projeyi Test Et ve OynaLocal Test: Hardhat node başlat (fork için): npx hardhat node (ayrı terminal), sonra npx hardhat run scripts/deploy.js --network localhost.
 Oyun Akışı:MetaMask ile bağlan (Sepolia).
 submitGuess("hello") – Şifreli tahmin, event emit.
 createPoll("En iyi kelime?") – Oylama başlat.
@@ -82,7 +100,7 @@ mintGuessNFT("world", 100) – NFT mint et.
 
 FHE Test: Zama docs'tan docs.zama.ai decrypt fonksiyonu ekle.
 
-Adım 6: Geliştirme ve DebugWatch Mode: npx hardhat watch (değişiklikleri otomatik derle).
+Adım 7: Geliştirme ve DebugWatch Mode: npx hardhat watch (değişiklikleri otomatik derle).
 Gaz Optimizasyon: npx hardhat run scripts/deploy.js --network sepolia --show-stack-traces.
 Frontend Entegrasyonu (Opsiyonel): React app ekle – cd frontend && npm install && npm start (port 3000'i Codespaces Ports'ta public yap).
 
@@ -93,7 +111,9 @@ rm -rf node_modules && npm install
 Hardhat compile hatası
 Solidity versiyonu kontrol et (hardhat.config.js), npx hardhat clean
 Zama FHE compile hatası
-pip install --upgrade concrete-compiler, docs.zama.ai/docs/concrete
+pip install --upgrade concrete-python, docs.zama.ai/concrete/quickstart
+Anahtar üretme hatası
+Python 3.8+ kontrol et, generate_key.py'yi çalıştır
 Deploy RPC hatası
 .env'de SEPOLIA_RPC_URL kontrol et, Infura key yenile
 Test ETH yok
@@ -104,7 +124,7 @@ RAM artır (Codespace Settings > Machine type)
 Smart Contract'lar HakkındaSuperEncryptedWordle.sol: Ana contract – tahmin, oylama, NFT mint. FHE ile submitEncryptedGuess(bytes calldata encryptedGuess).
 IWordle.sol: Interface – event'ler ve fonksiyon signature'ları.
 
-Katkı ve LisansFork'la, PR aç! Issues için yeni issue oluştur.
+Katkı ve LisansFork'la, PR aç! Issues için yeni issue oluştur. Zama entegrasyonu için Zama Discord sor.
 Lisans: MIT – LICENSE detayları.Bu README, 29 Eylül 2025 itibarıyla günceldir. Zama FHEVM docs: docs.zama.ai. Sorun için: @Coinbol
- on X. (Kopyala-yapıştır için: Bu metni GitHub'da "Add file > Create new file > README.md" ile yapıştır, veya Codespaces'te echo "..." > README.md ile güncelle.)
+ 
 
