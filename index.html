@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Word Kingdom - Web Prototip</title>
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f0f8ff; }
+        button { padding: 10px 20px; background: #4CAF50; color: white; border: none; cursor: pointer; margin: 10px 0; }
+        button:hover { background: #45a049; }
+        #status { color: #333; margin: 10px 0; }
+        input { padding: 10px; width: 200px; margin: 10px 0; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <h1>🗡️ Super Word Kingdom</h1>
+    <p>Zama FHEVM tabanlı gizlilik odaklı kelime krallığı! Kripto, sohbet, oylama ve NFT pazaryeri için prototip.</p>
+    
+    <div id="connect-section">
+        <button id="connectButton">MetaMask ile Bağlan</button>
+        <p id="status">Henüz bağlanmadı. MetaMask yüklü mü?</p>
+    </div>
+    
+    <div id="game-section" class="hidden">
+        <h2>Krallık Oyunu</h2>
+        <p>Cüzdan Adresin: <span id="address"></span></p>
+        <input type="text" id="wordInput" placeholder="Bir kelime gir (örn: krallık)">
+        <button id="submitWord">Kelimeyi Taçlandır!</button>
+        <p id="result">Sonuç burada görünecek...</p>
+        
+        <h3>Yer Tutucular (Genişletilebilir):</h3>
+        <ul>
+            <li><strong>Grup Sohbeti:</strong> Gelecekte FHE şifreli mesajlaşma.</li>
+            <li><strong>Oylama:</strong> MetaMask imzalı gizli oylar.</li>
+            <li><strong>NFT Pazaryeri:</strong> Kelime NFT'leri mint et (ethers.js ile).</li>
+        </ul>
+    </div>
+
+    <script>
+        const connectButton = document.getElementById('connectButton');
+        const status = document.getElementById('status');
+        const gameSection = document.getElementById('game-section');
+        const addressEl = document.getElementById('address');
+        const wordInput = document.getElementById('wordInput');
+        const submitButton = document.getElementById('submitWord');
+        const result = document.getElementById('result');
+
+        let provider;
+        let signer;
+
+        connectButton.addEventListener('click', async () => {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    // MetaMask ile bağlan
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                    signer = provider.getSigner();
+                    
+                    const address = await signer.getAddress();
+                    status.textContent = 'Bağlandı! Adres: ' + address;
+                    addressEl.textContent = address;
+                    
+                    connectButton.classList.add('hidden');
+                    gameSection.classList.remove('hidden');
+                    
+                    // Ağ değişikliği dinle
+                    window.ethereum.on('chainChanged', () => window.location.reload());
+                } catch (error) {
+                    status.textContent = 'Bağlantı hatası: ' + error.message;
+                }
+            } else {
+                status.textContent = 'MetaMask yüklü değil! Lütfen yükleyin: https://metamask.io';
+            }
+        });
+
+        submitButton.addEventListener('click', () => {
+            const word = wordInput.value.trim();
+            if (!word) {
+                result.textContent = 'Kelime girin!';
+                return;
+            }
+            
+            // Basit puan hesabı (gerçekte smart contract'a deploy edilebilir)
+            const score = word.length * (Math.floor(Math.random() * 10) + 1);
+            result.innerHTML = `<strong>${word}</strong> kelimesi taçlandı! Puan: ${score} 💎<br>(Gerçek oyunda bu NFT olurdu – Zama FHE ile gizli oylama ekle!)`;
+            
+            // Örnek: Gelecekte signer ile transaction (örn: vote tx)
+            // await signer.sendTransaction({ to: 'contract-address', value: ethers.utils.parseEther('0.001') });
+        });
+    </script>
+</body>
+</html>
