@@ -1,1 +1,12 @@
 
+{
+    "name": "super-word-kingdom",
+    "version": "1.0.0",
+    "dependencies": {
+        "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+        "@openzeppelin/contracts": "^5.0.0",
+        "@fhevm/solidity": "^0.1.0",
+        "merkletreejs": "^0.3.11",
+        "keccak256": "^1.0.6"
+    }
+}
