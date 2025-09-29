@@ -73,7 +73,6 @@ npx hardhat run scripts/verify.js --network sepolia
 
 Beklenen Çıktı: Konsola contract adresi yazılır (örn: "SuperEncryptedWordle deployed to: 0x123..."). .env'ye WORDLE_CONTRACT_ADDRESS=0x123... ekle.
 Gaz Maliyeti: Test ETH yeterli (0.01-0.1 ETH).
-
 Adım 5: Projeyi Test Et ve OynaLocal Test: Hardhat node başlat (fork için): npx hardhat node (ayrı terminal), sonra npx hardhat run scripts/deploy.js --network localhost.
 Oyun Akışı:MetaMask ile bağlan (Sepolia).
 submitGuess("hello") – Şifreli tahmin, event emit.
@@ -105,5 +104,6 @@ Smart Contract'lar HakkındaSuperEncryptedWordle.sol: Ana contract – tahmin, o
 IWordle.sol: Interface – event'ler ve fonksiyon signature'ları.
 
 Katkı ve LisansFork'la, PR aç! Issues için yeni issue oluştur.
-Lisans: MIT – LICENSE detayları.
+Lisans: MIT – LICENSE detayları.Bu README, 29 Eylül 2025 itibarıyla günceldir. Zama FHEVM docs: docs.zama.ai. Sorun için: @Coinbol
+ on X. (Kopyala-yapıştır için: Bu metni GitHub'da "Add file > Create new file > README.md" ile yapıştır, veya Codespaces'te echo "..." > README.md ile güncelle.)
 
